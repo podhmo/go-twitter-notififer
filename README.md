@@ -1,0 +1,2 @@
+# egoist
+individual twitter notification
