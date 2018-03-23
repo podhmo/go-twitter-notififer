@@ -48,8 +48,6 @@ func run(path string) error {
 		return err
 	}
 
-	anaconda.SetConsumerKey(c.ConsumerKey)
-	anaconda.SetConsumerSecret(c.ConsumerSecret)
 	api := anaconda.NewTwitterApiWithCredentials(
 		c.AccessToken,
 		c.AccessTokenSecret,
