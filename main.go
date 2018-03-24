@@ -57,9 +57,7 @@ func run(path string) error {
 		c.ConsumerSecret,
 	)
 
-	twitterStream := api.UserStream(nil)
-	for {
-		x := <-twitterStream.C
+	for x := range api.UserStream(nil).C {
 		switch tweet := x.(type) {
 		case anaconda.Tweet:
 			if err := beeep.Notify(tweet.User.Name, tweet.FullText, "assets/information.png"); err != nil {
