@@ -18,8 +18,8 @@ import (
 )
 
 type opt struct {
-	path     string
-	showIcon bool
+	configPath string
+	showIcon   bool
 }
 
 // config :
@@ -33,20 +33,27 @@ type config struct {
 func main() {
 	var opt opt
 	app := kingpin.New("egoist", "twitter client")
-	app.Flag("config", "config file path").Short('c').Required().ExistingFileVar(&opt.path)
+	app.Flag("config", "config file path").Short('c').ExistingFileVar(&opt.configPath)
 	app.Flag("show-icon", "show profile icon").BoolVar(&opt.showIcon)
 
 	if _, err := app.Parse(os.Args[1:]); err != nil {
 		app.FatalUsage(err.Error())
 	}
 
+	u, err := user.Current()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	dir := filepath.Join(u.HomeDir, ".config/egoist")
+
+	if opt.configPath == "" {
+		opt.configPath = filepath.Join(dir, "config.json")
+		log.Println("guessing confing path", opt.configPath)
+	}
+
 	var downloader *icondownload.Downloader
 	if opt.showIcon {
-		u, err := user.Current()
-		if err != nil {
-			log.Fatal(err)
-		}
-		dir := filepath.Join(u.HomeDir, ".config/egoist")
 		downloader = icondownload.New(filepath.Join(dir, "img"))
 		if f, _ := os.Open(filepath.Join(dir, "mapping.json")); f != nil {
 			decoder := json.NewDecoder(f)
@@ -85,7 +92,7 @@ func main() {
 		}()
 	}
 
-	if err := run(opt.path, downloader); err != nil {
+	if err := run(opt.configPath, downloader); err != nil {
 		log.Fatalf("%+v", err)
 	}
 }
